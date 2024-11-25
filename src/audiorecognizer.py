@@ -15,7 +15,7 @@ class Extract_embeddings:
     def _initialize_recognizer(self):
         return EncoderClassifier.from_hparams(
             source="speechbrain/spkrec-ecapa-voxceleb",
-            savedir="tmp_model",
+            savedir="../tmp_model",
             run_opts={"device": self.device},
         )
 

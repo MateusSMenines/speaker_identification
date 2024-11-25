@@ -21,11 +21,12 @@ class Speaker_identification:
 
     def verify_id(self, embedding):
         embedding = embedding[0]
-        if not self.data_audio:
-            self.data_audio[self.id] = [embedding]
-            return
         max_distance = float("inf")
         current_id = None
+        if not self.data_audio:
+            self.data_audio[self.id] = [embedding]
+            logging.info(f"New id assigned: {self.id}")
+            return
         for class_id, embeddings in self.data_audio.items():
             distance = self.calculate_distance(embedding, embeddings)
             if distance < max_distance:
@@ -52,10 +53,15 @@ class Speaker_identification:
                 self.recognizer.adjust_for_ambient_noise(source, duration=1)
                 audio_data = self.recognizer.listen(source)
                 try:
-                    extracted_embedding = self.processed_audio.collect_embedding(
+                    embedding = self.processed_audio.collect_embedding(
                         audio_data.get_wav_data()
                     )
-                    self.verify_id(extracted_embedding)
+                    command = self.recognizer.recognize_google(
+                        audio_data,
+                        language="pt-BR",
+                    ).lower()
+                    print(command)
+                    self.verify_id(embedding)
                 except sr.UnknownValueError:
                     logging.info("Unable to understand audio.")
 
