@@ -45,15 +45,13 @@ class Speaker_identification:
             while True:
                 logging.info("Defining operator. Speak...")
                 self.recognizer.adjust_for_ambient_noise(source, duration=1)
-                audio_operator = self.recognizer.listen(source)
+                operator = input("operatador: ")
                 try:
-                    command = self.recognizer.recognize_google(
-                        audio_operator,
-                        language="pt-BR",
-                    ).lower()
-                    if "operador" in command:
+                    if "operador" in operator:
+                        audio_operator = input("diretorio audio operador: ")
+                        audio_operator = "teste/" + audio_operator + ".wav"
                         embedding = self.processed_audio.collect_embedding(
-                            audio_operator.get_wav_data()
+                            audio_operator
                         )
                         operator_id = self.verify_id(embedding, define_operador=True)
                         logging.info(
@@ -66,30 +64,25 @@ class Speaker_identification:
                     logging.info("Unable to understand audio.")
                 if self.operator == True:
                     while True:
-                        audio_command = self.recognizer.listen(source)
+                        command = input("diretorio audio comando: ")
+                        audio_command = "teste/" + command + ".wav"
+                        if "deixar" in command:
+                            logging.info("Leaving operator")
+                            self.operator = False
+                            break
                         embedding = self.processed_audio.collect_embedding(
-                            audio_command.get_wav_data()
+                            audio_command
                         )
                         try:
-                            command_text = self.recognizer.recognize_google(
-                                audio_command,
-                                language="pt-BR",
-                            ).lower()
                             command_id = self.verify_id(
                                 embedding,
                                 define_operador=False,
                             )
-                            if command_id is not None:
-                                if command_id == operator_id:
-                                    logging.info(f"Command sent by ID = {operator_id}")
-                                else:
-                                    logging.info(f"Unidentified operator")
+                            if command_id == operator_id:
+                                logging.info(f"Command sent by ID = {operator_id}")
                             else:
-                                logging.info("Repeat command")
-                            if "deixar" in command_text:
-                                logging.info("Leaving operator")
-                                self.operator = False
-                                break
+                                logging.info(f"Unidentified operator")
+
                         except sr.UnknownValueError:
                             logging.info("Unable to understand audio.")
 
